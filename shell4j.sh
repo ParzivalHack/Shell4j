@@ -1,12 +1,12 @@
 #!/bin/bash
 echo "  _________"
-toilet | Shell4j |
+toilet   Shell4j 
 echo "  —————————"
 
 # Prompt the user for a URL
-echo "   ______________ "
-read -p |"Enter a URL: |" URL
-echo "   —————————————— "
+echo "    ______________ "
+read -p "| Enter a URL: |" URL
+echo "    —————————————— "
 # Use cURL to fetch the contents of the URL
 CONTENTS=$(curl -s "$URL")
 
