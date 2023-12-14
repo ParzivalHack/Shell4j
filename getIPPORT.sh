@@ -10,8 +10,14 @@ webserverdomain=$(dig +short "$domain" | awk '!/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$
 # Use dig to retrieve the IP address of the web server
 ip_address=$(dig +short "$domain" | tail -n1)
 
-# Use curl to retrieve the web server's port
-port=$(curl -sI "$url" | grep -i "location: http" | awk -F: '{print $3}' | tr -d '\r')
+# Set the default port based on the URL scheme
+if [[ $url == "http"* ]]; then
+    port=80
+elif [[ $url == "https"* ]]; then
+    port=443
+else
+    port=$(curl -sI "$url" | grep -i "location: http" | awk -F: '{print $3}' | tr -d '\r')
+fi
 
 # Display the results in a more organized way
 echo "Website Information for $url:"
