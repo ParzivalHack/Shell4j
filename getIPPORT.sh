@@ -7,11 +7,14 @@ read -p "Enter the URL: " url
 domain=$(echo "$url" | awk -F[/:] '{print $4}')
 
 # Use dig to retrieve the IP address of the web server
-ip_address=$(dig +short "$domain")
+ip_address=$(dig +short "$domain" | tail -n1)
 
 # Use curl to retrieve the web server's port
 port=$(curl -sI "$url" | grep -i "location: http" | awk -F: '{print $3}' | tr -d '\r')
 
-# Display the results
+# Display the results in a more organized way
+echo "Website Information for $url:"
+echo "-------------------------------------"
 echo "Web Server IP Address: $ip_address"
 echo "Web Server Port: $port"
+echo "-------------------------------------"
