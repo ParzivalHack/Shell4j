@@ -11,9 +11,9 @@ webserverdomain=$(dig +short "$domain" | awk '!/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$
 ip_address=$(dig +short "$domain" | tail -n1)
 
 # Set the default port based on the URL scheme
-if [[ $url == "http"* ]]; then
+if [[ $url == "http://"* ]]; then
     port=80
-elif [[ $url == "https"* ]]; then
+elif [[ $url == "https://"* ]]; then
     port=443
 else
     port=$(curl -sI "$url" | grep -i "location: http" | awk -F: '{print $3}' | tr -d '\r')
