@@ -1,5 +1,6 @@
 #!/bin/bash
 toilet -F gay Shell4j
+
 # Function to conduct heuristic tests for Log4j vulnerabilities
 conduct_heuristic_tests() {
     echo "Heuristic Testing for $url:"
@@ -10,35 +11,35 @@ conduct_heuristic_tests() {
 
     # Check if the log4j configuration is exposed in the contents
     if grep -q "log4j\.configuration" <<< "$CONTENTS"; then
-      echo "[!] Heuristic (basic) tests shows that the log4j configuration may be exposed"
+      echo "[!] Heuristic (basic) tests show that the log4j configuration may be exposed"
       echo "[?] Exploitation: An attacker may be able to modify the log4j configuration to gain access to sensitive information or execute arbitrary code."
     else
-      echo "[!] Heuristic (basic) tests shows that the log4j configuration may NOT be exposed"
+      echo "[!] Heuristic (basic) tests show that the log4j configuration may NOT be exposed"
     fi
 
     # Check if log4j is vulnerable to log injection
     if grep -q "log4j\.appender\.FILE\.Threshold" <<< "$CONTENTS"; then
-      echo "[!] Heuristic (basic) tests shows that the URL may be vulnerable to log injection"
+      echo "[!] Heuristic (basic) tests show that the URL may be vulnerable to log injection"
       echo "[?] Exploitation: An attacker may be able to inject malicious log entries that can execute arbitrary code or compromise sensitive information."
     else
-      echo "[!] Heuristic (basic) tests shows that the URL may NOT be vulnerable to log injection"
+      echo "[!] Heuristic (basic) tests show that the URL may NOT be vulnerable to log injection"
     fi
 
     # Check if log4j is vulnerable to log forging
     if grep -q "log4j\.appender\.FILE\.layout\.ConversionPattern" <<< "$CONTENTS"; then
-      echo "[!] Heuristic (basic) tests shows that the URL may be vulnerable to log forging"
+      echo "[!] Heuristic (basic) tests show that the URL may be vulnerable to log forging"
       echo "[?] Exploitation: An attacker may be able to forge log entries to hide their activity or manipulate log data."
     else
-      echo "[!] Heuristic (basic) tests shows that the URL may NOT be vulnerable to log forging"
+      echo "[!] Heuristic (basic) tests show that the URL may NOT be vulnerable to log forging"
     fi
 
     echo "-------------------------------------"
 }
 
-
 # Prompt user for a URL
 read -p "Enter the URL: " url
 echo "-------------------------------------"
+
 # Execute heuristic tests
 conduct_heuristic_tests
 
@@ -92,8 +93,11 @@ read -p "Insert URL for Log4j version check: " log4j_url
 echo "[*] Checking for Log4j presence and version..."
 log4jVersion=$(curl -s "$log4j_url" | grep -oP 'org/apache/logging/log4j/.*?jar' | grep -oP '[0-9]+\.[0-9]+\.[0-9]+')
 
-# Check if Log4j version is vulnerable (less than 2.15)
-if [[ -n "$log4jVersion" && $(echo "$log4jVersion" | awk -F. '{print $1*10000 + $2*100 + $3}') -lt 201500 ]]; then
+# Check if Log4j version is vulnerable (less than 2.15) or not detected
+if [ -z "$log4jVersion" ]; then
+    echo "[!] No Log4j library detected. Exiting..."
+    exit 1
+elif [ $(echo "$log4jVersion" | awk -F. '{print $1*10000 + $2*100 + $3}') -lt 201500 ]; then
     echo "[!] Log4j vulnerability detected. Log4j version: $log4jVersion"
 else
     echo "[*] No Log4j vulnerability detected. Log4j version: $log4jVersion"
