@@ -13,7 +13,7 @@ conduct_heuristic_tests() {
       echo "[!] Heuristic (basic) tests shows that the log4j configuration may be exposed"
       echo "[?] Exploitation: An attacker may be able to modify the log4j configuration to gain access to sensitive information or execute arbitrary code."
     else
-      echo "[*] No log4j vulnerabilities detected"
+      echo "[!] No log4j vulnerabilities detected"
     fi
 
     # Check if log4j is vulnerable to log injection
@@ -34,7 +34,7 @@ conduct_heuristic_tests() {
 
 # Prompt user for a URL
 read -p "Enter the URL: " url
-
+echo "-------------------------------------"
 # Execute heuristic tests
 conduct_heuristic_tests
 
@@ -70,10 +70,12 @@ server_type_html=$(curl -sL "$url" | grep -iE "<meta[^>]*server[^>]*>" | sed -n 
 # Display the detected server type
 if [ -n "$server_type_header" ]; then
     serverType="$server_type_header"
-    echo "[+] Server Type (from header): $serverType"
+    echo "Server Type (from header): $serverType"
+    echo "-------------------------------------"
 elif [ -n "$server_type_html" ]; then
     serverType="$server_type_html"
-    echo "[+] Server Type (from HTML): $serverType"
+    echo "Server Type (from HTML): $serverType"
+    echo "-------------------------------------"
 else
     echo "[!] Server type not detected. Exiting."
     exit 1
