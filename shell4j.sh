@@ -13,19 +13,23 @@ conduct_heuristic_tests() {
       echo "[!] Heuristic (basic) tests shows that the log4j configuration may be exposed"
       echo "[?] Exploitation: An attacker may be able to modify the log4j configuration to gain access to sensitive information or execute arbitrary code."
     else
-      echo "[!] No log4j vulnerabilities detected"
+      echo "[!] Heuristic (basic) tests shows that the log4j configuration may NOT be exposed"
     fi
 
     # Check if log4j is vulnerable to log injection
     if grep -q "log4j\.appender\.FILE\.Threshold" <<< "$CONTENTS"; then
       echo "[!] Heuristic (basic) tests shows that the URL may be vulnerable to log injection"
       echo "[?] Exploitation: An attacker may be able to inject malicious log entries that can execute arbitrary code or compromise sensitive information."
+    else
+      echo "[!] Heuristic (basic) tests shows that the URL may NOT be vulnerable to log injection"
     fi
 
     # Check if log4j is vulnerable to log forging
     if grep -q "log4j\.appender\.FILE\.layout\.ConversionPattern" <<< "$CONTENTS"; then
       echo "[!] Heuristic (basic) tests shows that the URL may be vulnerable to log forging"
       echo "[?] Exploitation: An attacker may be able to forge log entries to hide their activity or manipulate log data."
+    else
+      echo "[!] Heuristic (basic) tests shows that the URL may NOT be vulnerable to log forging"
     fi
 
     echo "-------------------------------------"
