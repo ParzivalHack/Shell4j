@@ -100,7 +100,7 @@ if [ -z "$log4jVersion" ]; then
 elif [ $(echo "$log4jVersion" | awk -F. '{print $1*10000 + $2*100 + $3}') -lt 201500 ]; then
     echo "[!] Log4j vulnerability detected. Log4j version: $log4jVersion"
 else
-    echo "[*] No Log4j vulnerability detected. Log4j version: $log4jVersion"
+    echo "[!] No Log4j vulnerability detected. Log4j version: $log4jVersion"
 fi
 
 # Start a public HTTP server using ngrok
